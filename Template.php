@@ -256,18 +256,7 @@ class Template
 		  },'custom/path/to/view');
 	*
 	*/
-
-	private function _flash($args){		
-		// $this->_CI->load->library('session');
-		// $varIable = isset($args[0]) ? $args[0] : 'system_message';
-		// if($this->_CI->session->flashdata !== null){
-		// 			var_dump($this->_CI->session->flashdata);exit;
-		// }
-
-		// return $this->_CI->session->flashdata($varIable);		
-	}
-
-
+	
 	private function _redirect($args){
 		$url = isset($args[0]) ? $args[0] : false;
 		$msg = isset($args[1]) ? $args[1] : false;
