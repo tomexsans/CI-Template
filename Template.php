@@ -101,6 +101,14 @@
  *
  * - Loads the CSS files	
  * = $_TEMPLATE_CSS_
+ *
+ * //Redirection with flashdata
+ * Template::redirect('path/to/redirect','Message to be saved','key');						
+ *
+ * Automatically available in views data as $_FLASHDATA_key
+ *
+ * Template::redirect('path/to/redirect',array('test','tost'),'keyofFlash');
+ * Automatically available in views data as array $_FLASHDATA_keyofFlash 
  */
 
 class Template 
@@ -114,8 +122,8 @@ class Template
 			$_js_foot = '',
 			$_js_head = '',
 			$_css= '' ,
-			$compress_output = true,
-			$minify_output	 = true;
+			$compress_output = false,
+			$minify_output	 = false;
 
 	private $template_path 		= 'templates';	//must be inside the views_path directory	
 	private $pages_path 		= 'pages';		//must be inside the views_path directory
@@ -249,9 +257,55 @@ class Template
 	*
 	*/
 
+	private function _flash($args){		
+		// $this->_CI->load->library('session');
+		// $varIable = isset($args[0]) ? $args[0] : 'system_message';
+		// if($this->_CI->session->flashdata !== null){
+		// 			var_dump($this->_CI->session->flashdata);exit;
+		// }
+
+		// return $this->_CI->session->flashdata($varIable);		
+	}
+
+
+	private function _redirect($args){
+		$url = isset($args[0]) ? $args[0] : false;
+		$msg = isset($args[1]) ? $args[1] : false;
+		$var = isset($args[2]) ? $args[2] : 'system_message';
+
+		$dataToSet[$var]=$msg;
+		$this->_CI->session->set_flashdata($dataToSet);
+
+		if($url === false)
+		{
+			//do nothing
+		}else{
+			redirect($url);
+		}
+	}	
+
 	private function _load($args = array())
 	{
-		$CI = $this->_CI;		
+		$CI = $this->_CI;
+
+		if($CI->load->is_loaded('session'))
+		{
+			if($CI->session->get_flash_keys())
+			{		
+				$_flash_Data = array();		
+				foreach ($CI->session->get_flash_keys() as $key => $flashDataKey) {
+					$_flash_Data['_FLASHDATA_'.$flashDataKey] = $CI->session->flashdata($flashDataKey);
+				}
+			}else{
+				$_flash_Data = array();
+			}
+		}else{
+			$_flash_Data = array();
+		}
+
+		$this->data = array_merge($this->data,$_flash_Data);
+
+		
 		$_MTD = $CI->router->method;
 		$_CLS = $CI->router->class;
 		$_DIR = $CI->router->directory;
@@ -281,7 +335,7 @@ class Template
 		{
 			if(count($this->partials) >= 1)
 			{				
-				$view_data = $this->data;
+				$view_data = array_merge($this->data);
 				$partial_data = $this->partials;
 
 				$build['_TEMPLATE_PARTIALS_'] = function($partial_name = null ,array $more_data = array()) use ($view_data,$partial_data,$CI){
