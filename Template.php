@@ -134,20 +134,20 @@ class Template
 			$this->_CI->load->helper('url');
 		}
 
-		SELF::$TEMPLATE = $this;
+		self::$TEMPLATE = $this;
 	}
 
 	public static function __callstatic($name,$args)
 	{
-		if(method_exists(SELF::$TEMPLATE, '_'.$name))
+		if(method_exists(self::$TEMPLATE, '_'.$name))
 		{
 			switch ($name) 
 			{
 				case 'warning':
-					return SELF::$TEMPLATE->{'_'.$name}($args);
+					return self::$TEMPLATE->{'_'.$name}($args);
 				break;				
 				default:
-					SELF::$TEMPLATE->{'_'.$name}($args);
+					self::$TEMPLATE->{'_'.$name}($args);
 				break;
 			}
 		}
@@ -207,12 +207,14 @@ class Template
 
 
 	private function _javascript($args){
+		$js_ext = '.js';
 		$data = isset($args[0]) ? $args[0] : false;
 		$location = isset($args[1]) ? $args[1] : 'foot';
 		$use_var = in_array(strtolower($location),['head','top','above','header']) ? '_js_head' : '_js_foot';
 		$template = '<script src="{{src}}" type="text/javascript"></script>';
-		foreach($data as $k => $v){			
-			$this->$use_var .= str_replace('{{src}}', strpos($v, '^') === false ? base_url($v) : substr($v, strpos($v, '^')+1) , $template);
+		foreach($data as $k => $v){
+			$js_ext = strpos(strtolower($v),'.js') === false ? '.js' : '';			
+			$this->$use_var .= str_replace('{{src}}', strpos($v, '^') === false ? base_url($v).$js_ext : substr($v, strpos($v, '^')+1) , $template);
 		}
 	}
 
@@ -256,7 +258,18 @@ class Template
 		  },'custom/path/to/view');
 	*
 	*/
-	
+
+	private function _flash($args){		
+		// $this->_CI->load->library('session');
+		// $varIable = isset($args[0]) ? $args[0] : 'system_message';
+		// if($this->_CI->session->flashdata !== null){
+		// 			var_dump($this->_CI->session->flashdata);exit;
+		// }
+
+		// return $this->_CI->session->flashdata($varIable);		
+	}
+
+
 	private function _redirect($args){
 		$url = isset($args[0]) ? $args[0] : false;
 		$msg = isset($args[1]) ? $args[1] : false;
